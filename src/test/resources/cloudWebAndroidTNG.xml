@@ -1,0 +1,17 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Cloud Web Android Suite">
+  <parameter name="appType" value="web"/>
+  <parameter name="udid" value="9A311FFAZ001WY"/>
+  <parameter name="platformName" value="Android"/>
+  <parameter name="browserName" value="Chrome"/>
+  <test name="Cloud Web Android">
+    <groups>
+      <run>
+        <include name="web"/>
+      </run>
+    </groups>
+    <packages>
+      <package name="scenarios"/>
+    </packages>
+  </test>
+</suite>
