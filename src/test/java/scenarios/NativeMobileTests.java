@@ -1,28 +1,65 @@
 package scenarios;
 
+import static org.testng.Assert.assertEquals;
+import static utils.TestPropertiesLoader.getProperty;
+
 import org.testng.annotations.Test;
 import setup.BaseTest;
-import setup.DataProviders;
 
 public class NativeMobileTests extends BaseTest {
 
-    @Test(groups = {"native"}, description = "Registration and sign in test",
-            dataProvider = "dataProviderForNativeTest", dataProviderClass = DataProviders.class)
-    public void simpleNativeTest(String email, String username, String password, String pageTitle) throws
-            IllegalAccessException, NoSuchFieldException, InstantiationException {
+    @Test(groups = {"native"})
+    public void testSuccessfulSingIn()
+        throws IllegalAccessException, NoSuchFieldException, InstantiationException {
 
-        getPage().getWebElement("registerBtn").click();
-        getPage().getWebElement("registrationEmailField").sendKeys(email);
-        getPage().getWebElement("registrationUserNameField").sendKeys(username);
-        getPage().getWebElement("registrationPasswordField").sendKeys(password);
-        getPage().getWebElement("registrationPasswordConfirmField").sendKeys(password);
-        getPage().getWebElement("agreementCheckbox").click();
-        getPage().getWebElement("registerNewAccBtn").click();
+        /*Registration activity*/
 
-        getPage().getWebElement("loginEmailField").sendKeys(email);
-        getPage().getWebElement("loginPassField").sendKeys(password);
-        getPage().getWebElement("signInBtn").click();
+        //Open registration page by clicking on register button
+        getIPageObject().getElement("registerButton").click();
 
-        assert (getPage().getWebElement("pageTitle").getText().equals(pageTitle));
+        //Input register email
+        getIPageObject().getElement("registerEmailField")
+                  .sendKeys(getProperty("email"));
+
+        //Input register username
+        getIPageObject().getElement("registerUsernameField")
+                  .sendKeys(getProperty("username"));
+
+        //Input register password
+        getIPageObject().getElement("registerPasswordField")
+                  .sendKeys(getProperty("password"));
+
+        //Confirm register password
+        getIPageObject().getElement("registerConfirmPasswordField")
+                  .sendKeys(getProperty("password"));
+
+        // Hide keyboard to continue interactions
+        getDriver().hideKeyboard();
+
+        //Complete registration by clicking on register new account button
+        getIPageObject().getElement("registerNewAccountButton").click();
+
+        /*SignIn Activity*/
+
+        //Input registered email
+        getIPageObject().getElement("loginField")
+                  .sendKeys(getProperty("email"));
+
+        //Input registered password
+        getIPageObject().getElement("passwordField")
+                  .sendKeys(getProperty("password"));
+
+        //Perform login by clicking on sign in button
+        getIPageObject().getElement("signInButton").click();
+
+
+        /*Budget Activity*/
+
+        //Make sure I'm on the BudgetActivity page
+        String activityName = getIPageObject().getElement("activity").getText();
+        assertEquals(activityName, "BudgetActivity", "Incorrect screen name");
+
+        System.out.println("Android native test done");
+
     }
 }
