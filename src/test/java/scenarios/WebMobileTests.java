@@ -1,38 +1,44 @@
 package scenarios;
 
-import org.openqa.selenium.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static utils.TestPropertiesLoader.getProperty;
+
+import java.util.List;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Test;
+import pageObjects.WebPageObject;
 import setup.BaseTest;
-import setup.DataProviders;
-
-import java.util.Objects;
-
-import static org.testng.Assert.assertTrue;
 
 public class WebMobileTests extends BaseTest {
 
-    @Test(groups = {"web"}, description = "Google search result test",
-            dataProvider = "dataProviderForWebTest", dataProviderClass = DataProviders.class)
-    public void simpleWebTest(String url, String pageTitle, String searchPhrase) throws Exception {
+    @Test(groups = {"web"})
+    public void testSuccessfulGoogleSearch() throws InterruptedException {
 
-        // Open page
-        getDriver().get(url);
+        //Open Google search page
+        getDriver().get(getProperty("google_url"));
 
-        // Make sure that page has been loaded completely
-        new WebDriverWait(getDriver(), 20).until(
-                wd -> ((JavascriptExecutor) wd).executeScript("return document.readyState").equals("complete"));
+        new WebDriverWait(getDriver(), 100)
+            .until(wd -> ((JavascriptExecutor) wd)
+                .executeScript("return document.readyState")
+                .equals("complete"));
 
-        // Check page title
-        assert ((WebDriver) getDriver()).getTitle().equals(pageTitle) : "This is not Google page";
+        WebPageObject webPageObject = new WebPageObject(getDriver());
 
-        // Check that search results contain searchPhrase
-        getPage().getWebElement("searchField").sendKeys(searchPhrase, Keys.ENTER);
+        //Make a search using keyword 'EPAM'
+        WebElement searchField = webPageObject.getSearchField();
+        searchField.click();
+        searchField.sendKeys(getProperty("query") + "\n");
 
-        assertTrue(getPage().getWebElements("searchResults").stream()
-                .map(WebElement::getText)
-                .filter(Objects::nonNull)
-                .map(String::trim)
-                .anyMatch(text -> text.toLowerCase().contains(searchPhrase.toLowerCase())));
+        //Make sure there are some relevant results
+        List<WebElement> searchResults = webPageObject.getSearchResults();
+        for(WebElement result : searchResults){
+            assertThat(result.getText())
+                .as("No relevant results found")
+                .contains(getProperty("query"));
+        }
+
+        System.out.println("Android web test done");
     }
 }
